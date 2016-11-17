@@ -1,4 +1,5 @@
 FSharp.Core
+StackExchange.Redis
 group Test
 NUnit
 NUnit.Runners

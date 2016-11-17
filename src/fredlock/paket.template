@@ -1,0 +1,25 @@
+type project
+title
+    fredlock
+owners
+    Albert-Jan Nijburg
+authors 
+    Albert-Jan Nijburg
+projectUrl
+    https://github.com/albertjan/fredlock
+iconUrl
+    https://raw.githubusercontent.com/albertjan/fredlock/master/docs/files/img/logo.png
+licenseUrl
+    https://github.com/albertjan/fredlock/blob/master/LICENSE.txt
+requireLicenseAcceptance
+    false
+copyright
+    Copyright 2015
+tags
+    redis lock redlock oxen bull.js
+summary
+    An F# implementation of the redlock algorythm for distributed redis locks.
+description
+    http://antirez.com/news/101
+
+
