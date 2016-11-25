@@ -1,6 +1,7 @@
 source https://nuget.org/api/v2
 
 nuget FSharp.Core redirects: force
+nuget redis-64
 nuget StackExchange.Redis
 
 group Build
