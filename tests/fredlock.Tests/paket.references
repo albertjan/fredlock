@@ -1,5 +1,6 @@
 FSharp.Core
 StackExchange.Redis
-group Test
-NUnit
-NUnit.Runners
+
+group Tests
+	FsUnit.xUnit 
+	xunit.runners

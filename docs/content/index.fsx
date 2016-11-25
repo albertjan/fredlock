@@ -13,8 +13,8 @@ Documentation
   <div class="span1"></div>
   <div class="span6">
     <div class="well well-small" id="nuget">
-      The fredlock library can be <a href="https://nuget.org/packages/fredlock">installed from NuGet</a>:
-      <pre>PM> Install-Package fredlock</pre>
+      The fredlock library can be <a href="https://nuget.org/packages/fredlock">installed from NuGet with paket</a>:
+      <pre>paket add nuget fredlock -i</pre>
     </div>
   </div>
   <div class="span1"></div>
