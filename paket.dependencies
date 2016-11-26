@@ -20,4 +20,5 @@ group Tests
   source https://www.nuget.org/api/v2
   
   nuget FsUnit.xUnit 
+nuget xunit.runner.console
   nuget xunit.runners

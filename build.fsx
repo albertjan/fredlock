@@ -8,6 +8,7 @@ open Fake.Git
 open Fake.AssemblyInfoFile
 open Fake.ReleaseNotesHelper
 open Fake.UserInputHelper
+open Fake.Testing.XUnit2
 open System
 open System.IO
 #if MONO
@@ -77,6 +78,18 @@ let (|Fsproj|Csproj|Vbproj|Shproj|) (projFileName:string) =
     | f when f.EndsWith("shproj") -> Shproj
     | _                           -> failwith (sprintf "Project file %s not supported. Unknown project type." projFileName)
 
+Target "StartRedis" (fun _ ->
+    async {
+        let redisPath = "." </> "packages" </> "Redis-64" </> "tools" </> "redis-server.exe"
+        do! 
+            [|
+                Shell.AsyncExec (redisPath, "--port 6379") |> Async.Ignore
+                Shell.AsyncExec (redisPath, "--port 6380") |> Async.Ignore
+                Shell.AsyncExec (redisPath, "--port 6381") |> Async.Ignore
+            |] |> Async.Parallel |> Async.Ignore
+    } |> Async.Start
+)
+
 // Generate assembly info files with the right version & up-to-date information
 Target "AssemblyInfo" (fun _ ->
     let getAssemblyInfoAttributes projectName =
@@ -141,11 +154,12 @@ Target "Build" (fun _ ->
 
 Target "RunTests" (fun _ ->
     !! testAssemblies
-    |> NUnit (fun p ->
+    |> xUnit2 (fun p ->
         { p with
-            DisableShadowCopy = true
+            // DisableShadowCopy = true
             TimeOut = TimeSpan.FromMinutes 20.
-            OutputFile = "TestResults.xml" })
+            // OutputFile = "TestResults.xml" 
+            })
 )
 
 #if MONO
@@ -370,6 +384,7 @@ Target "BuildPackage" DoNothing
 Target "All" DoNothing
 
 "AssemblyInfo"
+  ==> "StartRedis"
   ==> "Build"
   ==> "CopyBinaries"
   ==> "RunTests"
