@@ -7,7 +7,7 @@ open FSharp.Control
 /// The lock type
 type Lock = {
   resource: string;
-  value: string option;
+  value: string;
   expiration: int64;
 }
 
@@ -100,9 +100,7 @@ type Redlock (mp: ConnectionMultiplexer, ?state: RedlockState) =
   let dbFactory () = mps |> Seq.map(fun mp -> mp.GetDatabase(state.db))
 
   let unlockInstance lock (db:IDatabase) = 
-    match lock.value with
-    | Some l -> db.ScriptEvaluateAsync(state.unlockScript, [|lock.resource |> RedisKey.op_Implicit|], [| l |>  RedisValue.op_Implicit|]) |> Async.AwaitTask |> Async.Ignore
-    | None -> async { () }
+    db.ScriptEvaluateAsync(state.unlockScript, [|lock.resource |> toKey|], [| lock.value |> String |> toValue|]) |> Async.AwaitTask |> Async.Ignore
   
   let internalLock (resource:string) (value: string option) (ttl:int64) =
     async {
@@ -132,9 +130,9 @@ type Redlock (mp: ConnectionMultiplexer, ?state: RedlockState) =
           let validityTime = ttl - (nowEpoch() - start) - drift
                    
           match (res >= quorum && validityTime > 0L, attempts = 0) with
-          | (true, _) -> return Some { resource = resource; value = value |> Some; expiration = start + validityTime - drift}
+          | (true, _) -> return Some { resource = resource; value = value; expiration = start + validityTime - drift}
           | (false, _) as x ->
-            do! dbs |> Seq.map (unlockInstance { resource = resource; value = Some value; expiration = 0L }) |> Seq.toArray |> Async.Sequential |> Async.Ignore 
+            do! dbs |> Seq.map (unlockInstance { resource = resource; value = value; expiration = 0L }) |> Seq.toArray |> Async.Sequential |> Async.Ignore 
             if x |> snd then
               return None
             else
@@ -179,7 +177,7 @@ type Redlock (mp: ConnectionMultiplexer, ?state: RedlockState) =
     if rlock.expiration < nowEpoch () then
       async { return None }
     else
-      internalLock rlock.resource rlock.value ttl
+      internalLock rlock.resource (Some rlock.value) ttl
 
   /// Release a lock on a resource
   /// `
